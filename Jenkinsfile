@@ -5,33 +5,31 @@ node {
      
     }
    stage('Build') {
-    withMaven(jdk: 'JDK-1.8', maven: 'Maven-3.6.1') {
+    withMaven(jdk: 'jdk-1.8', maven: 'maven-3.6') {
       sh 'mvn clean compile'
       }
     }
    stage('Unit Test run') {
-    withMaven(jdk: 'JDK-1.8', maven: 'Maven-3.6.1') {
+    withMaven(jdk: 'jdk-1.8', maven: 'maven-3.6') {
      sh 'mvn test'
       } 
     }
-   stage('Sonarqube analysis'){
-      def scannerHome = tool 'javascanner';
-   withSonarQubeEnv(credentialsId: 'ItrainSonar') {
-    withMaven(jdk: 'JDK-1.8', maven: 'Maven-3.6.1') {
+   
+   
+stage('Sonarqube analysis'){
+   
+   def scannerHome = tool 'JavaScanner';
+
+   withSonarQubeEnv(credentialsId: 'sonar_qube')
+ {
+    withMaven(jdk: 'jdk-1.8', maven: 'maven-3.6') 
+{
     sh 'mvn sonar:sonar' 
       }
-     }
-    }
-  stage("Quality Gate"){
-          timeout(time: 1, unit: 'HOURS') {
-              def qg = waitForQualityGate()
-              if (qg.status != 'OK') {
-                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
-              }
-          }
-    }
+   }
+   }
    stage('Package to Jfrog') {
-    withMaven(jdk: 'JDK-1.8', maven: 'Maven-3.6.1') {
+    withMaven(jdk: 'jdk-1.8', maven: 'maven-3.6') {
      sh 'mvn package'
       }
     }
